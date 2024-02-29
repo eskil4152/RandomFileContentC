@@ -1,12 +1,19 @@
 #include <stdio.h>
 #include "../include/createFile.h"
-#include "../include/checkChoice.h"
+#include "../include/inputValidators/checkChoice.h"
 #include "../include/createContent/createFileContentForWords.h"
 #include "../include/createContent/createFileContentForIntegers.h"
 
 void createFile(){
     FILE* file;
-    file = fopen("temp.txt", "w");
+
+    printf("Please provide a name for the file you want to write to \n");
+    char fileName[24];
+
+    scanf("%s", fileName);
+    sprintf(fileName, "%s.txt", fileName);
+
+    file = fopen(fileName, "w");
 
     int* fileContentType = checkChoice();
 

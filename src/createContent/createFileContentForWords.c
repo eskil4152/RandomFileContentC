@@ -1,18 +1,17 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include <string.h>
-#include "../include/cJSON.h"
+#include "../include/tools/cJSON.h"
 #include "../include/createContent/createFileContentForWords.h"
-#include "../include/checkSizeInput.h"
+#include "../include/inputValidators/checkSizeInput.h"
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata);
 
 void createFileContentForWords(FILE* file){
     CURL *curl;
     CURLcode res;
-    char response_buffer[4096] = ""; // Adjust size as needed
+    char response_buffer[4096] = "";
 
-    // Initialize libcurl
     curl = curl_easy_init();
     if(curl) {
         int* input = checkSizeInput();
@@ -50,7 +49,7 @@ void createFileContentForWords(FILE* file){
                 cJSON_ArrayForEach(word, json) {
                         fprintf(file, "%s\n", word->valuestring);
                     }
-                    printf("Words written to file.\n");
+                    printf("Words successfully written to file.\n");
             } else {
                 fprintf(stderr, "Failed to open file for writing.\n");
             }
@@ -62,7 +61,6 @@ void createFileContentForWords(FILE* file){
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
     }
-    printf("Response: \n%s\n", response_buffer);
 }
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {

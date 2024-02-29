@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/checkChoice.h"
+#include "../include/inputValidators/checkChoice.h"
 
 int* checkChoice(){
     int* input = (int*)malloc(sizeof(int));

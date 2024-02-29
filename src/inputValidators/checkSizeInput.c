@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/checkSizeInput.h"
+#include "../include/inputValidators/checkSizeInput.h"
 
 int* checkSizeInput() {
     int* input = (int*)malloc(sizeof(int));
