@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <curl/curl.h>
 #include <string.h>
 #include "../include/tools/cJSON.h"
@@ -7,17 +8,23 @@
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata);
 
-void createFileContentForWords(FILE* file){
+void createFileContentForWords(FILE* file) {
     CURL *curl;
     CURLcode res;
     char response_buffer[4096] = "";
 
     curl = curl_easy_init();
-    if(curl) {
+    if (curl) {
         int* input = checkSizeInput();
         char url[255];
 
+        if (input == NULL) {
+            fprintf(stderr, "Failed to allocate memory for input\n");
+            exit(1); // or handle the error appropriately
+        }
+
         sprintf(url, "https://random-words5.p.rapidapi.com/getMultipleRandom?count=%d", *input);
+        free(input); // Free memory allocated for input
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
 
@@ -36,32 +43,34 @@ void createFileContentForWords(FILE* file){
         res = curl_easy_perform(curl);
 
         // Check for errors
-        if(res != CURLE_OK)
+        if (res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        else
+        } else {
             printf("Response:\n%s\n", response_buffer);
 
-        cJSON *json = cJSON_Parse(response_buffer);
-        if (json)
-        {
-            if (file){
+            cJSON *json = cJSON_Parse(response_buffer);
+            if (json) {
                 cJSON* word = cJSON_Parse(response_buffer);
-                cJSON_ArrayForEach(word, json) {
+                if (word) {
+                    cJSON_ArrayForEach(word, json) {
                         fprintf(file, "%s\n", word->valuestring);
                     }
                     printf("Words successfully written to file.\n");
+                    cJSON_Delete(word);
+                } else {
+                    fprintf(stderr, "Failed to parse words from JSON response.\n");
+                }
+                cJSON_Delete(json);
             } else {
-                fprintf(stderr, "Failed to open file for writing.\n");
+                fprintf(stderr, "Failed to parse JSON response.\n");
             }
-            cJSON_Delete(json);
-        } else {
-            fprintf(stderr, "Failed to parse JSON response.\n");
         }
-        
+
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
     }
 }
+
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     size_t total_size = size * nmemb;
