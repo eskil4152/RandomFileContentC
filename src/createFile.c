@@ -27,6 +27,10 @@ void createFile(){
     case 2:
         createFileContentForIntegers(file);
         break;
+
+    case 3:
+        createFileContentForWordsThreaded(fileName);
+        break;
     default:
         break;
     }

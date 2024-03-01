@@ -1,132 +1,96 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <unistd.h>
 #include <pthread.h>
 #include "../include/createContent/createFileContentForWordsThreaded.h"
 #include "../include/inputValidators/checkSizeInput.h"
 
-#define MAX_LINE_LENGTH 1024
-#define BUFFER_SIZE 1000
+void* myThread(void* args){
+    void** argsP = (void**)args;
 
-char buffer[BUFFER_SIZE][MAX_LINE_LENGTH];
-int bufferIndex = 0;
-int bufferCount = 0;
-int linesRead = 0; // Tracks the total lines read by reader threads
+    FILE* fileRead = fopen("words.txt", "r");
+    FILE* fileWrite = (FILE*)argsP[0];
+    int lines = *((int*)argsP[1]);
+    int numbers = *((int*)argsP[2]);
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t canRead = PTHREAD_COND_INITIALIZER;
-pthread_cond_t canWrite = PTHREAD_COND_INITIALIZER;
-int endOfFile = 0; // Flag to indicate end of file
-
-void* reader(void* arg) {
-    FILE* file = (FILE*)arg;
-    char line[MAX_LINE_LENGTH];
-
-    while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
-        pthread_mutex_lock(&mutex);
-        while (bufferCount >= BUFFER_SIZE) {
-            pthread_cond_wait(&canWrite, &mutex);
-        }
-        
-        strcpy(buffer[bufferIndex], line);
-        bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-        bufferCount++;
-        pthread_cond_signal(&canRead);
-        pthread_mutex_unlock(&mutex);
-        linesRead++;
-    }
-
-    // Set endOfFile flag when reader threads finish
-    endOfFile = 1;
-
-    pthread_exit(NULL);
-}
-
-void* writer(void* args) {
-    void** arg_array = (void**)args;
-    FILE* file = (FILE*)arg_array[0];
-    int totalLines = *((int*)arg_array[1]);
-
-    while (1) {
-        pthread_mutex_lock(&mutex);
-        while (bufferCount <= 0 && !endOfFile) {
-            pthread_cond_wait(&canRead, &mutex);
-        }
-
-        if (bufferCount <= 0 && endOfFile) {
-            pthread_mutex_unlock(&mutex);
-            break;
-        }
-
-        fprintf(file, "%s", buffer[bufferIndex]);
-        bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-        bufferCount--;
-        pthread_cond_signal(&canWrite);
-        pthread_mutex_unlock(&mutex);
-    }
-
-    pthread_exit(NULL);
-}
-
-void createFileContentForWordsThreaded(FILE* file){
-    FILE* readFile = fopen("words.txt", "r");
-    if (!readFile)
+    for (int i = 0; i < numbers; i++)
     {
-        printf("no file");
-        return;
+        char line[64];
+        int currentLine = 0;
+        int random = (rand() % (lines - 0 + 1)) + 0;
+
+        fseek(fileRead, 0, SEEK_SET);
+
+        while (fgets(line, 1024, fileRead) != NULL) {
+            currentLine++;
+            if (currentLine == random) {
+                fprintf(fileWrite, "%s", line);
+                break;
+            }
+        }   
     }
 
+    printf("Done \n");
+
+    return NULL;
+}
+
+void createFileContentForWordsThreaded(char* fileName){
+    FILE* fileRead = fopen("words.txt", "r");
+
+    FILE* file = fopen(fileName, "w+");
+    fclose(file);
+
+    FILE* fileWrite = fopen(fileName, "a");
+
+    int threads = 4;
+    pthread_t thread[threads];
+
+    int* input;
     int lines = 0;
     int c;
 
-    for (c = getc(readFile); c != EOF; c = getc(readFile)) {
-        if (c == '\n') {
+    for (c = getc(fileRead); c != EOF; c = getc(fileRead)) {
+        if (c == '\n')
+        {
             lines++;
         }
     }
 
-    fseek(readFile, 0, SEEK_SET);
-    int* input;
+    fseek(fileRead, 0, SEEK_SET);
 
-    while (1) {
+    while (1)
+    {
         input = checkSizeInput();
 
-        if (*input <= lines) {
+        if (*input <= lines)
+        {
             break;
         }
         
         printf("Input must not be greater than %d\n", lines);
     }
 
-    // Pass totalLines and file pointer to writer threads
-    void* args[2];
-    args[0] = (void*)file;
+    fclose(fileRead);
+
+    int numberToPrint = *input;
+    int numbersPerThread = numberToPrint / threads;
+    printf("Numbers pr: %d\n", numbersPerThread);
+
+    void* args[3];
+    args[0] = (void*)fileWrite;
     args[1] = (void*)&lines;
+    args[2] = (void*)&numbersPerThread;
 
-    // Initialize reader and writer threads
-    pthread_t reader_threads[4], writer_threads[4];
-    int i;
-
-    // Create reader threads
-    for (i = 0; i < 4; i++) {
-        pthread_create(&reader_threads[i], NULL, reader, readFile);
+    for (int i = 0; i != threads; i++)
+    {
+        pthread_create(&thread[i], NULL, myThread, (void*)args); 
     }
 
-    // Create writer threads
-    for (i = 0; i < 4; i++) {
-        pthread_create(&writer_threads[i], NULL, writer, (void*)args);
-    }
+    for (int i = 0; i < threads; i++)
+    {
+        pthread_join(thread[i], NULL); 
+    }  
 
-    // Join reader threads
-    for (i = 0; i < 4; i++) {
-        pthread_join(reader_threads[i], NULL);
-    }
-
-    // Join writer threads
-    for (i = 0; i < 4; i++) {
-        pthread_join(writer_threads[i], NULL);
-    }
-
-    fclose(readFile);
-    free(input);
+    exit(0); 
 }

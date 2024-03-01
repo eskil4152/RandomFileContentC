@@ -13,13 +13,15 @@ int* checkChoice(){
     printf("Please enter: \n");
     printf("1 for words \n");
     printf("2 for numbers \n");
+    printf("3 for words with threads\n");
     while (1)
     {
-        if (scanf("%d", input) != 1 || (*input != 1 && *input != 2))
+        if (scanf("%d", input) != 1 || (*input != 1 && *input != 2 && *input != 3))
         {
             fprintf(stderr, "Invalid input, please enter \n");
-            printf("1 for words \n");
-            printf("2 for numbers \r\n \r\n \r\n");
+            printf("1 for words \r\n");
+            printf("2 for numbers \r\n");
+            printf("3 for words with threads \r\n \r\n \r\n");
             while(getchar() != '\n');
         } else {
             return input;
