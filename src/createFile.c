@@ -2,6 +2,7 @@
 #include "../include/createFile.h"
 #include "../include/inputValidators/checkChoice.h"
 #include "../include/createContent/createFileContentForWords.h"
+#include "../include/createContent/createFileContentForWordsThreaded.h"
 #include "../include/createContent/createFileContentForIntegers.h"
 
 void createFile(){
