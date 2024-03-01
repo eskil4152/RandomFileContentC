@@ -1,21 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/inputValidators/checkSizeInput.h"
 
 int* checkSizeInput() {
-    int* input = (int*)malloc(sizeof(int));
-    if (input == NULL) {
+    char input[256];
+    int* choice = (int*)malloc(sizeof(int));
+
+    if (choice == NULL) {
         printf("Failed to allocate memory\n");
         exit(1);
     }
 
     printf("Please enter size: \n");
     while (1) {
-        if (scanf("%d", input) != 1 || *input < 1) {
-            fprintf(stderr, "Invalid input, please enter a number \n");
-            while(getchar() != '\n');
+        fflush(stdout);
+
+        fgets(input, sizeof(input), stdin);
+        input[strcspn(input, "\n")] = '\0';
+
+        if (atoi(input) != 0)
+        {
+            *choice = atoi(input);
+
+            if (*choice >= 1)
+            {
+                return choice;
+            } else {
+                printf("Invalid input. Enter a number greater than 0. \n");
+            }
         } else {
-            return input;
+            printf("Invalid input. Enter a valid number. \n");
         }
     }
 }
