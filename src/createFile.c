@@ -9,7 +9,7 @@ void createFile(){
     FILE* file;
 
     printf("Please provide a name for the file you want to write to \n");
-    char fileName[24];
+    char fileName[256];
 
     scanf("%s", fileName);
     sprintf(fileName, "%s.txt", fileName);
@@ -30,5 +30,6 @@ void createFile(){
         break;
     }
     
+    free(fileContentType);
     fclose(file);
 }
