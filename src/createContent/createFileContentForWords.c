@@ -61,6 +61,7 @@ void createFileContentForWords(FILE* file){
             }
         }
     }
+    free(input);
 }
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
