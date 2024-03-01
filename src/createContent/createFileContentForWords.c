@@ -4,9 +4,11 @@
 #include <stdbool.h>
 #include <time.h>
 #include <stdlib.h>
+
 #include "../include/tools/cJSON.h"
 #include "../include/createContent/createFileContentForWords.h"
 #include "../include/inputValidators/checkSizeInput.h"
+#include "../include/tools/timer.h"
 
 #define MAX_LINE_LENGTH 1024
 
@@ -45,6 +47,9 @@ void createFileContentForWords(FILE* file){
         printf("Input must not be greater than %d\n", lines);
     }
 
+    long startTime, endTime, elapsed;
+
+    startTime = current_milliseconds();
     for (int i = 0; i < *input; i++)
     {
         char line[MAX_LINE_LENGTH];
@@ -63,6 +68,12 @@ void createFileContentForWords(FILE* file){
     }
     
     fclose(readFile);
+
+    endTime = current_milliseconds();
+    elapsed = endTime - startTime;
+
+    printf("Time to fill file with %d words: %ldms\n", *input, elapsed);
+
     free(input);
 }
 

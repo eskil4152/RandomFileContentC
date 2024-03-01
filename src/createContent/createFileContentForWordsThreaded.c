@@ -2,8 +2,10 @@
 #include <stdlib.h> 
 #include <unistd.h>
 #include <pthread.h>
+
 #include "../include/createContent/createFileContentForWordsThreaded.h"
 #include "../include/inputValidators/checkSizeInput.h"
+#include "../include/tools/timer.h"
 
 void* myThread(void* args){
     void** argsP = (void**)args;
@@ -32,6 +34,7 @@ void* myThread(void* args){
 
     printf("Done \n");
 
+    fclose(fileRead);
     return NULL;
 }
 
@@ -75,22 +78,29 @@ void createFileContentForWordsThreaded(char* fileName){
 
     int numberToPrint = *input;
     int numbersPerThread = numberToPrint / threads;
-    printf("Numbers pr: %d\n", numbersPerThread);
 
     void* args[3];
     args[0] = (void*)fileWrite;
     args[1] = (void*)&lines;
     args[2] = (void*)&numbersPerThread;
 
-    for (int i = 0; i != threads; i++)
+    for (int i = 0; i < threads; i++)
     {
         pthread_create(&thread[i], NULL, myThread, (void*)args); 
     }
 
+    long startTime, endTime, elapsed;
+    startTime = current_milliseconds();
+
     for (int i = 0; i < threads; i++)
     {
         pthread_join(thread[i], NULL); 
-    }  
+    }
+    
+    endTime = current_milliseconds();
+    elapsed = endTime - startTime;
 
-    exit(0); 
+    printf("Time for %d threads to fill file with %d words: %ldms\n", threads, numberToPrint, elapsed);
+
+    exit(0);
 }
