@@ -5,7 +5,6 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include "../include/tools/cJSON.h"
 #include "../include/createContent/createFileContentForWords.h"
 #include "../include/inputValidators/checkSizeInput.h"
 #include "../include/tools/timer.h"
