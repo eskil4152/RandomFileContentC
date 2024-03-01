@@ -61,6 +61,8 @@ void createFileContentForWords(FILE* file){
             }
         }
     }
+    
+    fclose(readFile);
     free(input);
 }
 
