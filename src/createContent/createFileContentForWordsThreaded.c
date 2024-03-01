@@ -78,6 +78,7 @@ void createFileContentForWordsThreaded(char* fileName){
 
     int numberToPrint = *input;
     int numbersPerThread = numberToPrint / threads;
+    free(input);
 
     void* args[3];
     args[0] = (void*)fileWrite;
@@ -102,5 +103,5 @@ void createFileContentForWordsThreaded(char* fileName){
 
     printf("Time for %d threads to fill file with %d words: %ldms\n", threads, numberToPrint, elapsed);
 
-    exit(0);
+    fclose(fileWrite);
 }
