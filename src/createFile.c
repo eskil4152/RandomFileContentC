@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "../include/createFile.h"
 #include "../include/inputValidators/checkChoice.h"
 #include "../include/createContent/createFileContentForWords.h"
